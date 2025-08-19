@@ -10,6 +10,7 @@ class Usuario:
     @property
     def id_usuario(self):
         return self._id_usuario
+
     @id_usuario.setter
     def id_usuario(self,id_usuario):
         self._id_usuario = id_usuario
@@ -24,7 +25,7 @@ class Usuario:
 
     @property
     def password(self):
-        self._password
+        return self._password
 
     @password.setter
     def password(self,password):
