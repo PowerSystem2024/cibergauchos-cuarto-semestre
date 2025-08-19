@@ -1,0 +1,13 @@
+# Carpetas de entornos virtuales
+.venv/
+venv/
+
+# Configuración de IDEs
+.idea/
+.vscode/
+
+# Archivos de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
