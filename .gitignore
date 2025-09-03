@@ -1,0 +1,7 @@
+# Ignorar pycache y compilados de Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ignorar logs
+*.log
