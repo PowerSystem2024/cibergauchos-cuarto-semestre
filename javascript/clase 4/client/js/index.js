@@ -1,43 +1,67 @@
 const shopContent = document.getElementById("shopContent");
-const cart = [];
+window.cart = JSON.parse(localStorage.getItem('cg_cart') || '[]');
 
-productos.forEach((producto) => {
-   const content = document.createElement("div");
-    content.innerHTML = `
-    <img src=${producto.imagen}>
-    <h3>${producto.productname}</h3>
-    <p>${producto.precio} $</p>
-    `;
-    shopContent.append(content);
+function saveCart(){
+    localStorage.setItem('cg_cart', JSON.stringify(window.cart));
+}
 
-    const buyButton = document.createElement("button");
-    buyButton.innerText = "Comprar";
+function renderProducts(){
+    shopContent.innerHTML = '';
+    productos.forEach((producto) => {
+        const card = document.createElement('div');
+        card.className = 'product-card';
+        card.innerHTML = `
+            <div class="product-img-wrapper"><img loading="lazy" src="${producto.imagen}" alt="${producto.productname}"></div>
+            <h3 class="product-title">${producto.productname}</h3>
+            <p class="product-price">$ ${producto.precio}</p>
+        `;
+        const buyButton = document.createElement('button');
+        buyButton.className = 'btn-add';
+        buyButton.textContent = 'Agregar';
+        card.appendChild(buyButton);
+        shopContent.appendChild(card);
 
-    content.append(buyButton);
+        buyButton.addEventListener('click', ()=> addToCart(producto));
+    });
+}
 
-    buyButton.addEventListener("click", ()=>{
-        const repeat = cart.some((repeatProduct) => repeatProduct.id === producto.id);
-
-        if(repeat) {
-            cart.map((prod)=> {
-                if(prod.id === producto.id){
-                    prod.cantidad++;
-                    displayCartCounter();
-                }
-            });
-        } else{
-            cart.push({
+function addToCart(producto){
+    const existing = window.cart.find(p=> p.id === producto.id);
+    if(existing){
+        existing.cantidad++;
+    } else {
+        window.cart.push({
             id: producto.id,
             productname: producto.productname,
             precio: producto.precio,
-            cantidad: producto.cantidad,
-            img: producto.imagen,
+            cantidad: 1,
+            img: producto.imagen
         });
-        displayCartCounter();
+    }
+    saveCart();
+    displayCartCounter();
+    showToast(`${producto.productname} agregado`);
+}
 
-        }
-        
-        console.log(cart)
+renderProducts();
 
-    })
-});
+// Toast notifications
+function showToast(message){
+    const stack = document.getElementById('toast-stack');
+    if(!stack) return;
+    const toast = document.createElement('div');
+    toast.className = 'cg-toast cg-toast-success';
+    toast.innerHTML = `
+        <span class="cg-toast-icon">🛒</span>
+        <span>${message}</span>
+        <button class="cg-toast-close" aria-label="Cerrar">×</button>
+    `;
+    stack.appendChild(toast);
+    const closeBtn = toast.querySelector('.cg-toast-close');
+    const remove = ()=>{
+        toast.classList.add('hide');
+        setTimeout(()=> toast.remove(), 340);
+    };
+    closeBtn.addEventListener('click', remove);
+    setTimeout(remove, 2600);
+}

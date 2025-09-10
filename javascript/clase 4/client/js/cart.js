@@ -1,12 +1,31 @@
 const modalContainer = document.getElementById("modal-container");
 const modalOverlay = document.getElementById("modal-overlay");
-
 const cartBtn = document.getElementById("cart-btn");
 const cartCounter = document.getElementById("cart-counter");
+// clearCartBtn eliminado del header: ahora se renderiza dentro del modal
+let mpPublicKey = null;
+
+async function ensurePublicKey(){
+  if(mpPublicKey) return mpPublicKey;
+  try{
+    const res = await fetch('/config');
+    const data = await res.json();
+    mpPublicKey = data.publicKey;
+    return mpPublicKey;
+  }catch(e){
+    console.error('No se pudo obtener la public key', e);
+    return null;
+  }
+}
+
+function saveCart(){
+  localStorage.setItem('cg_cart', JSON.stringify(window.cart));
+}
 
 const displayCart = () => {
   modalContainer.innerHTML = "";
   modalContainer.style.display = "block";
+  modalOverlay.style.display = 'block';
 
   /* Modal Header */
   const modalHeader = document.createElement("div");
@@ -29,8 +48,8 @@ const displayCart = () => {
   modalContainer.append(modalHeader);
 
   /* Modal Body */
-  if (cart.length > 0) {
-    cart.forEach((productos) => {
+  if (window.cart.length > 0) {
+    window.cart.forEach((productos) => {
       const modalBody = document.createElement("div");
       modalBody.className = "modal-body";
       modalBody.innerHTML = `
@@ -56,14 +75,16 @@ const displayCart = () => {
           productos.cantidad--;
           displayCart();
           displayCartCounter();
+          saveCart();
         }
       });
 
       const increse = modalBody.querySelector(".quantity-btn-increse");
       increse.addEventListener("click", () => {
-        productos.cantidad++;
+  productos.cantidad++;
         displayCart();
         displayCartCounter();
+  saveCart();
       });
 
       /* Delete */
@@ -75,62 +96,103 @@ const displayCart = () => {
     });
 
     /* Modal footer */
-    const total = cart.reduce((acc, el) => acc + el.precio * el.cantidad, 0);
+  const total = window.cart.reduce((acc, el) => acc + el.precio * el.cantidad, 0);
 
     const modalFooter = document.createElement("div");
     modalFooter.className = "modal-footer";
     modalFooter.innerHTML = `
-      <div class="total-price">Total: ${total}</div>
-      <button class="btn-primary" id="checkout-btn">Ir al checkout</button>
-      <div id="button-checkout"></div>
+      <div class="total-price"><span>Total</span> <span>$${total}</span></div>
+      <div style="display:flex; gap:.6rem; flex-wrap:wrap;">
+        <button class="btn-primary" id="checkout-btn">Pagar</button>
+        <button class="btn-primary" id="clear-cart-btn" style="background:#fff; color:#1d3246; box-shadow:none; border:1px solid var(--border);">Vaciar</button>
+      </div>
+      <div id="button-checkout" style="margin-top:.4rem;"></div>
     `;
     modalContainer.append(modalFooter);
 
+    const clearInside = modalFooter.querySelector('#clear-cart-btn');
+    clearInside.addEventListener('click', () => {
+      if(window.cart.length === 0) return;
+      if(confirm('¿Vaciar carrito?')){
+        window.cart = [];
+        saveCart();
+        displayCartCounter();
+        displayCart();
+      }
+    });
+
     /* MP */
-    const mercadopago = new MercadoPago(
-      "APP_USR-cd12f9b8-191a-48c9-a6e6-48c8f2f29fbf",
-      { locale: "es-AR" }
-    );
+    let mercadopagoInstance = null;
+
+    ensurePublicKey().then(pk => {
+      if(!pk){
+        console.error('Public key ausente');
+        return;
+      }
+      mercadopagoInstance = new MercadoPago(pk, { locale: 'es-AR' });
+    });
 
     const checkoutButton = modalFooter.querySelector("#checkout-btn");
     checkoutButton.addEventListener("click", function () {
       checkoutButton.remove();
 
       const orderData = {
-        quantity: 1,
-        description: "compra de ecommerce",
+        items: window.cart.map(p => ({
+          title: p.productname,
+          unit_price: Number(p.precio),
+          quantity: Number(p.cantidad),
+          currency_id: 'ARS'
+        })),
+        description: 'Compra Tienda Cibergauchos',
         price: total,
+        quantity: 1
       };
 
-      fetch("http://localhost:8080/create_preference", {
+      fetch("/create_preference", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(orderData),
       })
-        .then((response) => response.json())
-    .then((preference) => {
-      console.log("Respuesta backend:", preference); // 
-      if (preference.id) {
-        createCheckoutButton(preference.id || preference.body?.id);
-      } else {
-        alert("No se recibió preferenceId");
-      }
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-      alert("Unexpected error");
-    });
+        .then(async (response) => {
+          const text = await response.text();
+          let data;
+          try { data = text ? JSON.parse(text) : {}; } catch(parseErr){
+            console.error('[FETCH] Respuesta no JSON', text);
+            throw new Error('Respuesta no JSON del backend');
+          }
+          return { status: response.status, data };
+        })
+        .then(({status, data}) => {
+          console.log('[FETCH] create_preference status:', status, 'data:', data);
+          if (data.id) {
+            createCheckoutButton(data.id);
+          } else {
+            if(data.error){
+              alert('Error backend: ' + data.error);
+            } else {
+              alert("No se recibió preferenceId");
+            }
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetch create_preference:", error);
+          alert("Unexpected error creando preferencia");
+        });
 });
 
     function createCheckoutButton(preferenceId) {
-      const brickBuilder = mercadopago.bricks();
+      if(!mercadopagoInstance){
+        alert('No se pudo inicializar Mercado Pago');
+        return;
+      }
+      const brickBuilder = mercadopagoInstance.bricks();
       const renderComponent = async (brickBuilder) => {
         await brickBuilder.create("wallet", "button-checkout", {
           initialization: {
             preferenceId: preferenceId,
-            redirectMode: 'modal',
+            redirectMode: 'redirect'
           },
           callbacks: {
             onError: (error) => console.error(error),
@@ -151,18 +213,32 @@ const displayCart = () => {
 cartBtn.addEventListener("click", displayCart);
 
 const deleteCartProduct = (id) => {
-  const foundId = cart.findIndex((element) => element.id === id);
-  cart.splice(foundId, 1);
+  const foundId = window.cart.findIndex((element) => element.id === id);
+  window.cart.splice(foundId, 1);
   displayCart();
   displayCartCounter();
+  saveCart();
 };
 
 const displayCartCounter = () => {
-  const cartLength = cart.reduce((acc, el) => acc + el.cantidad, 0);
-  if (cartLength > 0) {
-    cartCounter.style.display = "block";
+  const cartLength = window.cart.reduce((acc, el) => acc + el.cantidad, 0);
+  if(cartLength > 0){
+    cartCounter.style.display = 'inline-block';
     cartCounter.innerText = cartLength;
+    cartBtn?.setAttribute('data-has-items','true');
   } else {
-    cartCounter.style.display = "none";
+    cartCounter.style.display = 'none';
+    cartBtn?.removeAttribute('data-has-items');
   }
 };
+
+// Botón vaciar ahora se maneja dentro del modal (clear-cart-btn)
+
+// Limpieza de carrito después de regresar de success
+if(window.location.pathname.endsWith('success.html')){
+  window.cart = [];
+  saveCart();
+  displayCartCounter();
+}
+
+displayCartCounter();
