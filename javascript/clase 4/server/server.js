@@ -14,7 +14,7 @@ if (!process.env.MP_PUBLIC_KEY) {
 }
 
 const client = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN || "" // vacío si falta (se mostrará warning arriba)
+  accessToken: process.env.MP_ACCESS_TOKEN || "" 
 });
 
 app.use(express.urlencoded({ extended: false }));
@@ -69,11 +69,9 @@ app.post("/create_preference", async (req, res) => {
       pending: `${baseUrl}/media/pending.html`
     };
 
-    // Validar success para auto_return; si falta, no enviar auto_return
     const preferenceBody = {
       items: bodyItems,
       back_urls: backUrls
-      // auto_return removido temporalmente mientras resolvemos error invalid_auto_return
     };
 
     console.log('[MP] Creando preferencia con body:', JSON.stringify(preferenceBody, null, 2));
@@ -91,22 +89,7 @@ app.post("/create_preference", async (req, res) => {
   }
 });
 
-// Middleware final para 404 API
-app.use((req, res, next) => {
-  if (req.method !== 'GET') {
-    console.warn(`[WARN] Ruta no encontrada: ${req.method} ${req.url}`);
-  }
-  return next(); // permitir que static sirva GETs restantes
-});
 
-// Feedback de pago
-app.get("/feedback", (req, res) => {
-  res.json({
-    Payment: req.query.payment_id,
-    Status: req.query.status,
-    MerchantOrder: req.query.merchant_order_id,
-  });
-});
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
