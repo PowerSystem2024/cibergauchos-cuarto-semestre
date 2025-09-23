@@ -3,7 +3,7 @@ let ataqueEnemigo;
 
 // CLASE PERSONAJE (POO)
 class Personaje {
-  constructor(nombre, vidas = 3, ataques = ["Punio", "Patada", "Barrida"]) {
+  constructor(nombre, vidas = 3, ataques = ["Puño", "Patada", "Barrida"]) {
     this.nombre = nombre;
     this.vidas = vidas;
     this.ataques = ataques;
@@ -84,7 +84,7 @@ function seleccionarPersonajeJugador() {
     return;
   }
 
-  let nombreSeleccionado = selectedInput.value ? selectedInput.value : selectedInput.id;
+  let nombreSeleccionado = selectedInput.value;
   
   const base = personajes.find(
     (p) => p.nombre.toLowerCase() === nombreSeleccionado.toLowerCase()
