@@ -1,7 +1,24 @@
 let ataqueJugador; 
 let ataqueEnemigo;
-let vidasJugador = 3;
-let vidasEnemigo = 3;
+
+// CLASE PERSONAJE (POO)
+class Personaje {
+  constructor(nombre, vidas = 3, ataques = ["Puño", "Patada", "Barrida"]) {
+    this.nombre = nombre;
+    this.vidas = vidas;
+    this.ataques = ataques;
+  }
+}
+
+// LISTADO BASE DE PERSONAJES
+const personajes = [
+  new Personaje("Zuko"),
+  new Personaje("Katara"),
+  new Personaje("Aang"),
+  new Personaje("Toph"),
+  new Personaje("Azula"), 
+  new Personaje("Iroh")   
+];
 
 // Variables de secciones
 const sectionSeleccionarAtaque = document.getElementById('seleccionar-ataque');
@@ -19,17 +36,15 @@ const botonPatada = document.getElementById('boton-patada');
 const botonBarrida = document.getElementById('boton-barrida');
 const botonReiniciar = document.getElementById('boton-reiniciar');
 
-// Variables de inputs
-const inputZuko = document.getElementById('zuko');
-const inputKatara = document.getElementById('katara');
-const inputAang = document.getElementById('aang');
-const inputToph = document.getElementById('toph');
-
 // Variables de spans dinámicos
 const spanPersonajeJugador = document.getElementById('personaje-jugador');
 const spanPersonajeEnemigo = document.getElementById('personaje-enemigo');
 const spanVidasJugador = document.getElementById('vidas-jugador');
 const spanVidasEnemigo = document.getElementById('vidas-enemigo');
+
+// VARIABLES DE JUEGO (instancias clonadas)
+let personajeJugador = null;
+let personajeEnemigo = null;
 
 function iniciarJuego(){
     sectionSeleccionarAtaque.style.display = 'none'
@@ -62,96 +77,98 @@ function volverSeleccionPersonaje() {
 }
 
 function seleccionarPersonajeJugador() {
-    sectionSeleccionarAtaque.style.display = 'block'; 
-    sectionSeleccionarPersonaje.style.display = 'none' 
-    sectionReglas.style.display = 'none';
-    botonReglas.style.display = 'none';
+    const selectedInput = document.querySelector('input[name="personajes"]:checked');
 
-    if(inputZuko.checked){
-        spanPersonajeJugador.innerHTML = 'Zuko'
-    }else if(inputKatara.checked){
-        spanPersonajeJugador.innerHTML = 'Katara'
-    }else if(inputAang.checked){
-        spanPersonajeJugador.innerHTML = 'Aang'
-    }else if(inputToph.checked){
-        spanPersonajeJugador.innerHTML = 'Toph'
-    }else{
-       alert('🚨SELECCIONA UN PERSONAJE')
-       reiniciarJuego();
-    }
-    seleccionarPersonajeEnemigo()  
+  if (!selectedInput) {
+    alert("🚨SELECCIONA UN PERSONAJE");
+    return;
+  }
+
+  let nombreSeleccionado = selectedInput.value;
+  
+  const base = personajes.find(
+    (p) => p.nombre.toLowerCase() === nombreSeleccionado.toLowerCase()
+  );
+
+  if (!base) {
+    alert("🚨Personaje no encontrado: " + nombreSeleccionado);
+    return;
+  }
+
+  // clonamos el personaje base para que jugador y enemigo tengan vidas independientes
+  personajeJugador = new Personaje(base.nombre, base.vidas, base.ataques);
+
+  // limpiar mensajes previos y actualizar UI
+  sectionMensajes.innerHTML = "";
+  spanPersonajeJugador.innerHTML = personajeJugador.nombre;
+  spanVidasJugador.innerHTML = personajeJugador.vidas;
+
+  sectionSeleccionarAtaque.style.display = "block";
+  sectionSeleccionarPersonaje.style.display = "none";
+  sectionReglas.style.display = "none";
+  botonReglas.style.display = "none";
+
+  seleccionarPersonajeEnemigo()  
 }
 
 function seleccionarPersonajeEnemigo(){
-    let personajeAleatorio = aleatorio(1, 4);
+  const indice = aleatorio(0, personajes.length - 1);
+  const baseEnemigo = personajes[indice];
+  personajeEnemigo = new Personaje(baseEnemigo.nombre, baseEnemigo.vidas, baseEnemigo.ataques);
 
-    if(personajeAleatorio == 1){
-        spanPersonajeEnemigo.innerHTML = 'Zuko'
-    }else if(personajeAleatorio == 2){
-        spanPersonajeEnemigo.innerHTML = 'Katara'
-    }else if(personajeAleatorio == 3){
-        spanPersonajeEnemigo.innerHTML = 'Aang'
-    }else{
-        spanPersonajeEnemigo.innerHTML = 'Toph'
-    }
+  spanPersonajeEnemigo.innerHTML = personajeEnemigo.nombre;
+  spanVidasEnemigo.innerHTML = personajeEnemigo.vidas;
 }
 
 function ataquePunio(){
-    ataqueJugador = 'Punio'
-    ataqueAleatorioEnemigo()
+    ataqueJugador = 'Punio';
+    ataqueAleatorioEnemigo();
 }
 
 function ataquePatada(){
-    ataqueJugador = 'Patada'
-    ataqueAleatorioEnemigo()
+    ataqueJugador = 'Patada';
+    ataqueAleatorioEnemigo();
 }
 
 function ataqueBarrida(){
-    ataqueJugador = 'Barrida'
-    ataqueAleatorioEnemigo()
+    ataqueJugador = 'Barrida';
+    ataqueAleatorioEnemigo();
 }
 
 function ataqueAleatorioEnemigo(){
-    let ataqueAleatorio = aleatorio(1, 3);
-    
-    if(ataqueAleatorio == 1){
-        ataqueEnemigo = 'Punio'
-    }else if(ataqueAleatorio == 2){
-        ataqueEnemigo = 'Patada'
-    }else {
-        ataqueEnemigo = 'Barrida'
-    }
-    combate()
+    const ataqueAleatorio = aleatorio(0, personajeEnemigo.ataques.length - 1);
+    ataqueEnemigo = personajeEnemigo.ataques[ataqueAleatorio];
+    combate();
 }
 
 function combate(){
 
     if(ataqueEnemigo == ataqueJugador){
         crearMensaje("EMPATE")
-    } else if(ataqueJugador == 'Punio' && ataqueEnemigo == 'Barrida'){
+    } else if(ataqueJugador === 'Punio' && ataqueEnemigo === 'Barrida'){
         crearMensaje("GANASTE")
-        vidasEnemigo--;
-        spanVidasEnemigo.innerHTML = vidasEnemigo
-    } else if(ataqueJugador == 'Patada' && ataqueEnemigo == 'Punio'){
+        personajeEnemigo.vidas--;
+        spanVidasEnemigo.innerHTML = personajeEnemigo.vidas;
+    } else if(ataqueJugador === 'Patada' && ataqueEnemigo === 'Punio'){
         crearMensaje("GANASTE")
-        vidasEnemigo--;
-        spanVidasEnemigo.innerHTML = vidasEnemigo
-    } else if(ataqueJugador == 'Barrida' && ataqueEnemigo == 'Patada'){
+        personajeEnemigo.vidas--;
+        spanVidasEnemigo.innerHTML = personajeEnemigo.vidas;
+    } else if(ataqueJugador === 'Barrida' && ataqueEnemigo === 'Patada'){
         crearMensaje("GANASTE")
-        vidasEnemigo--;
-        spanVidasEnemigo.innerHTML = vidasEnemigo
+        personajeEnemigo.vidas--;
+        spanVidasEnemigo.innerHTML = personajeEnemigo.vidas;
     } else{
         crearMensaje("PERDISTE")
-        vidasJugador--;
-        spanVidasJugador.innerHTML = vidasJugador
+        personajeJugador.vidas--;
+        spanVidasJugador.innerHTML = personajeJugador.vidas;
     }
-    revisarVidas()
+    revisarVidas();
 }
 
 function revisarVidas(){
-    if(vidasEnemigo == 0){
+    if(personajeEnemigo.vidas <= 0){
         crearMensajeFinal("FELICITACIONES!!!!🎆🎆🎉🎉GANASTE🥳")
-    } else if(vidasJugador == 0){
+    } else if(personajeJugador.vidas <= 0){
         crearMensajeFinal("QUE PENA, HAS PERDIDO😭😭😭")
     }
 }
@@ -170,11 +187,15 @@ function crearMensajeFinal(resultado){
 }
 
 function crearMensaje(resultado){
-    let parrafo = document.createElement('p')
-
-    parrafo.innerHTML = 'Tu personaje atacó con ' + ataqueJugador + ', el personaje del enemigo atacó con ' + ataqueEnemigo + ' ' + resultado
-
-    sectionMensajes.appendChild(parrafo)
+    const parrafo = document.createElement("p");
+  parrafo.innerHTML =
+    "Tu personaje atacó con " +
+    ataqueJugador +
+    ", el personaje del enemigo atacó con " +
+    ataqueEnemigo +
+    ". " +
+    resultado;
+  sectionMensajes.appendChild(parrafo);
 }
 
 function reiniciarJuego(){
