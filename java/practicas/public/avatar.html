@@ -3,12 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LA LEYENDA DE AANG: AVATAR</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Roboto&display=swap" rel="stylesheet">
+    <title>LA LEYENDA DE AANG: AVATAR - Juego de Combate</title>
+    <meta name="description" content="Juego interactivo basado en Avatar: La Leyenda de Aang. Elige tu personaje y combate usando elementos.">
+    
+    <!-- Fuentes optimizadas -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P:wght@400&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Estilos -->
     <link rel="stylesheet" href="./css/styles.css">
+    
+    <!-- Favicon -->
+    <link rel="icon" href="./assets/avatar-icon.ico" type="image/x-icon">
 </head>
 <body>
-    <h1>AVATAR</h1> <!--Esto es estatico, NO cambia, el h1 se utiliza una vez -->
+    <!-- Título principal con efectos -->
+    <header>
+        <h1>🌟 AVATAR - CIBERGAUCHOS🌟</h1>
+        <p class="subtitulo">Elige tu destino, domina los elementos, ¡conviértete en leyenda!</p>
+    </header>
     <section id="inicio">
         <button id="boton-reglas">Reglas del Juego</button>
     </section>
@@ -87,22 +99,90 @@
         <button id="boton-personaje">Seleccionar</button>  <!--El boton para seleccionar el personaje-->  
     </section>
 
+    <!-- Sección de combate mejorada -->
     <section id="seleccionar-ataque">
-        <h2>Elige tu ataque</h2> <!--Se puede utilizar varias veces-->
-        <p>Tu personaje <span id="personaje-jugador"></span> tiene <span id="vidas-jugador">3</span> vidas</p> <!--Pero esto debe ser dinamico, necesitamosque cambie-->
-        <p>El personaje <span id="personaje-enemigo"></span> del enemigo tienen <span id="vidas-enemigo">3</span> vidas</p> <!--Con la etiqueta spam vamos a modificar el 3 con JS-->
-        <p>
-            <button id="boton-punio">Punio 👊</button>
-            <button id="boton-patada">Patada 🦵</button>
-            <button id="boton-barrida">Barrida 👣</button>
-        </p>
+        <h2>⚔️ Campo de Batalla ⚔️</h2>
+        
+        <!-- Panel de información de combatientes -->
+        <div class="combatientes-panel">
+            <div class="combatiente jugador">
+                <div class="avatar-combatiente">🧙‍♂️</div>
+                <h3><span id="personaje-jugador">Guerrero</span></h3>
+                <div class="info-vidas">
+                    <span>❤️ Vidas: <span id="vidas-jugador">3</span></span>
+                    <div class="barra-vida">
+                        <div class="barra-vida-fondo">
+                            <div class="barra-vida-relleno saludable"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="vs-indicator">
+                <span>⚡ VS ⚡</span>
+            </div>
+            
+            <div class="combatiente enemigo">
+                <div class="avatar-combatiente">🦹‍♀️</div>
+                <h3><span id="personaje-enemigo">Rival</span></h3>
+                <div class="info-vidas">
+                    <span>❤️ Vidas: <span id="vidas-enemigo">3</span></span>
+                    <div class="barra-vida">
+                        <div class="barra-vida-fondo">
+                            <div class="barra-vida-relleno saludable"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Botones de ataque con efectos -->
+        <div class="ataques-container">
+            <h3>🥊 Elige tu Técnica de Combate</h3>
+            <div class="ataques-grid">
+                <button id="boton-punio" class="ataque-btn fuego">
+                    <span class="ataque-emoji">👊</span>
+                    <span class="ataque-nombre">Puño de Fuego</span>
+                    <span class="ataque-descripcion">Golpe directo y poderoso</span>
+                </button>
+                <button id="boton-patada" class="ataque-btn agua">
+                    <span class="ataque-emoji">🦵</span>
+                    <span class="ataque-nombre">Patada del Agua</span>
+                    <span class="ataque-descripcion">Movimiento fluido y preciso</span>
+                </button>
+                <button id="boton-barrida" class="ataque-btn tierra">
+                    <span class="ataque-emoji">👣</span>
+                    <span class="ataque-nombre">Barrida Tierra</span>
+                    <span class="ataque-descripcion">Técnica defensiva sólida</span>
+                </button>
+            </div>
+        </div>
     </section>
 
-    <section id="mensajes"> <!--Sera un parrafo dinamico-->
+    <!-- Panel de mensajes mejorado -->
+    <section id="mensajes" class="mensajes-combate">
+        <h3>📜 Historial de Combate</h3>
+        <div class="scroll-container">
+            <!-- Los mensajes se generan dinámicamente aquí -->
+        </div>
     </section>
-    <section id="reiniciar">
-        <button id="boton-reiniciar">Reiniciar</button>
+    
+    <!-- Sección de reinicio -->
+    <section id="reiniciar" class="seccion-final">
+        <h2>🎮 ¿Otra Batalla?</h2>
+        <button id="boton-reiniciar" class="btn-reiniciar">
+            <span>🔄</span>
+            <span>Nueva Aventura</span>
+        </button>
     </section>
+    
+    <!-- Footer -->
+    <footer>
+        <p>🔥 Creado con passion por el grupo Cibergauchos 🌊</p>
+        <p>🌍 ¿Qué elemento dominarás? 💨</p>
+    </footer>
+    
+    <!-- JavaScript -->
     <script src="./js/avatar.js"></script>
 </body>
 </html>
