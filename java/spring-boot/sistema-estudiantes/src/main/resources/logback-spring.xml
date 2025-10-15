@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!-- Appender for logging within the console -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <!-- Solo mostrar el mensaje sin información adicional -->
+            <pattern>%msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Configurar niveles específicos para reducir logs innecesarios -->
+    <!-- Hibernate logs -->
+    <logger name="org.hibernate" level="WARN"/>
+    <logger name="org.hibernate.SQL" level="WARN"/>
+    <logger name="org.hibernate.type" level="WARN"/>
+
+    <!-- HikariCP logs (pool de conexiones) -->
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+
+    <!-- Spring Framework logs -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.boot" level="WARN"/>
+
+    <!-- JPA logs -->
+    <logger name="org.springframework.orm.jpa" level="WARN"/>
+
+    <!-- Solo logs de nuestra aplicación en INFO -->
+    <logger name="cibergauchos.estudiantes" level="INFO"/>
+
+    <!-- Nivel raíz en WARN para evitar logs innecesarios -->
+    <root level="WARN">
+        <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
