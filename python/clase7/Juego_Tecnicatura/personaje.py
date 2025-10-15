@@ -5,24 +5,31 @@ from constantes import ASSETS_PATH
 class Personaje:
     def __init__(self, x, y):
         # Construye la ruta completa a la imagen del personaje
-        self.image = pygame.image.load(os.path.join(ASSETS_PATH, 'images', 'personaje1.png'))
+        self.image = pygame.image.load(os.path.join(ASSETS_PATH, 'images', 'Speeder.png'))
         self.image = pygame.transform.scale(self.image, (95, 95))
         self.shape = self.image.get_rect(center=(x, y))
         self.lasers = []
         self.energia = 100  # Barra de energía inicial
+
+        self.tiempo_ultimo_dano = 0
+        self.cooldown_dano = 1000 # 1 segundo de invencibilidad después de recibir daño
 
     def mover(self, dx, dy):
         self.shape.x += dx
         self.shape.y += dy
 
     def lanzar_laser(self):
-        laser = laser(self.shape.centerx, self.shape.top)
+        laser = Laser(self.shape.centerx, self.shape.top)
         self.lasers.append(laser)
 
     def recibir_dano(self):
-        self.energia -= 10
+        ahora = pygame.time.get_ticks()
+        if ahora - self.tiempo_ultimo_dano > self.cooldown_dano:
+            self.energia -= 10
+            self.tiempo_ultimo_dano = ahora # Actualiza el tiempo del último daño
+
         if self.energia <= 0:
-            self.energia <= 0
+            self.energia = 0
             return False
         return True
 
@@ -41,9 +48,12 @@ class Enemigo:
         # Construye la ruta completa a la imagen del enemigo
         self.image = pygame.image.load(os.path.join(ASSETS_PATH, 'images', 'enemigo1.png'))
         self.image = pygame.transform.scale(self.image, (80, 80))
-        self.image = self.image.get_rect(Topleft=(x, y))
+        self.rect = self.image.get_rect(topleft=(x, y))
 
-    def mover(self, screen):
+    def mover(self):
+        self.rect.y += 3  # Velocidad del enemigo
+
+    def dibujar(self, screen):
         screen.blit(self.image, self.rect.topleft)
 
 
@@ -62,7 +72,7 @@ class Laser:
 class Explosion:
     def __init__(self, x, y):
         # Construye la ruta completa a las imágenes de la explosión
-        self.images = [pygame.image.load(os.path.join(ASSETS_PATH, 'images', f'regularExplosion0{i:2}.png')) for i in range(9)]
+        self.images = [pygame.image.load(os.path.join(ASSETS_PATH, 'images', f'regularExplosion0{i:02d}.png')) for i in range(9)]
         self.index = 0  # Índice para la animación
         self.image = self.images[self.index]  # Imagen actual
         self.rect = self.image.get_rect(center=(x, y))  # Rectángulo de la imagen
@@ -73,6 +83,7 @@ class Explosion:
         # Actualiza la animación
         self.frame_rate += 1
         if self.frame_rate >= self.max_frames:
+            self.frame_rate = 0
             self.index += 1
             if self.index >= len(self.images):
                 return False  # retorna en false por que aqui termina las animacion que va a ir de 0 -> 9
