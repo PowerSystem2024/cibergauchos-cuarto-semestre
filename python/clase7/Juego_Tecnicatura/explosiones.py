@@ -5,7 +5,7 @@ from constantes import ASSETS_PATH
 class Explosion:
     def __init__(self, x, y):
         # Construye la ruta completa a las imágenes de la explosión
-        self.images = [pygame.image.load(os.path.join(ASSETS_PATH, 'images', f'regularExplosion0{i:2}.png')) for i in range(9)]
+        self.images = [pygame.image.load(os.path.join(ASSETS_PATH, 'images', f'regularExplosion0{i:02d}.png')) for i in range(9)]
         self.index = 0
         self.image = self.images[self.index]
         self.rect = self.image.get_rect(center=(x, y))
