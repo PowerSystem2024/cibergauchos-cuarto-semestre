@@ -78,3 +78,17 @@ Las variables globales sirven para guardar datos que pueden usarse en todo el pr
 👉 Se usan para compartir información entre funciones o para guardar configuraciones generales.
 
 ⚠️ Pero hay que usarlas con cuidado, porque si muchas partes del código las cambian, puede generar errores difíciles de encontrar.
+
+## ARRAYS O ARREGLOS
+Estos pueden ser cadenas de texto, números, booleanos, entre otros. Existe un tipo de dato llamado Array o 
+arreglo que te permite agrupar N cantidad de valores, en una sola variable.
+Los arrays son muy dinámicos, permiten hacer muchísimas cosas como recorrer cada valor, filtrar datos, 
+convertirlos, entre otras acciones.
+
+
+## OBJETOS VS ARREGLOS
+Los objetos y los arreglos pueden guardar cualquier tipo de estructura de datos que necesites. No hay limitaciones.Incluso puede combinar ambos para guardar niveles de información más complejos.
+
+
+## CICLOS: manipulando el DOM con iteradores
+La información que posean tus variables en el código JavaScript, pueden ser procesadas y renderizadas hacia el DOM para visualizar la información en el navegador web y que el usuario pueda interactuar con los datos.
